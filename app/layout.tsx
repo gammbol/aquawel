@@ -24,8 +24,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+    <head>
+      {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+      <script src="https://kit.fontawesome.com/9a4581b7b4.js" crossOrigin="anonymous"></script>
+    </head>
+    <body
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
       </body>
