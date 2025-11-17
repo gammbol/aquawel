@@ -10,8 +10,8 @@ const BottomHeader = () => {
       </div>
       <ul className="flex justify-center items-center gap-10">
         <li><Link href="/">Главная</Link></li>
-        <li><Link href="/store">Магазин</Link></li>
         <li><Link href="/about">О нас</Link></li>
+        <li><Link href="/store">Магазин</Link></li>
       </ul>
       <div className="flex justify-center items-center gap-5">
         <Link href="/account"><i className="fa-solid fa-user"></i></Link>
