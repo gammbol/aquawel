@@ -107,6 +107,8 @@ const BottomHeader = () => {
               <i className="fa-solid fa-bag-shopping text-xl"></i>
             </Link>
           </div>
+          <p className="text-center text-sm text-gray-700">г.Домодедово, Станционная ул. 3</p>
+          <p className="text-center text-sm text-gray-700 mb-1"><i className="fa-solid fa-phone mr-2"></i>+7 800 555 3535</p>
           <p className="text-center text-sm text-gray-500">
             Aquawel © 2024
           </p>
