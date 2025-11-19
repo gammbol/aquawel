@@ -1,8 +1,12 @@
+'use client';
+import {useModal} from "@/app/contexts/ModalContext";
 import React from 'react';
 
 const Hero = () => {
+  const { openModal } = useModal();
+
   return (
-    <div className="bg-[url(/hero-bg.jpg)]">
+    <section className="bg-[url(/hero-bg.jpg)]">
       <div className="bg-black/65 backdrop-blur-2xl w-full h-full">
         <div className="max-w-7xl mx-auto py-48 md:py-64 px-5 flex flex-col items-center justify-center">
           <h1 className="font-medium text-6xl text-white mb-1 md:text-9xl">Aquawel</h1>
@@ -15,6 +19,7 @@ const Hero = () => {
               кнопикс в разработке :3
             </button>
             <button
+              onClick={openModal}
               className="btn btn-outline btn-md md:btn-md lg:btn-lg
               xl:btn-xl md:max-w-1/2 w-full p-3 md:p-0 rounded-none text-white hover:bg-[#947458]">
               Оставить заявку
@@ -22,7 +27,7 @@ const Hero = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

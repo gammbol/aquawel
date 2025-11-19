@@ -1,10 +1,16 @@
 'use client';
+import {useModal} from "@/app/contexts/ModalContext";
 import React, {useState} from 'react';
 import {PhoneInput} from "react-international-phone";
 import 'react-international-phone/style.css';
 
 const Footer = () => {
   const [phone, setPhone] = useState('');
+  const { openModal } = useModal();
+
+  const handleOpenModal = () => {
+    openModal(phone); // Передаем текущий номер телефона
+  };
 
   return (
     <footer className="bg-[#F6F4F2] p-5">
@@ -18,7 +24,7 @@ const Footer = () => {
             value={phone}
             onChange={(phone) => setPhone(phone)}
           />
-          <button className="btn btn-outline btn-xs sm:btn-sm md:btn-md
+          <button onClick={handleOpenModal} className="btn btn-outline btn-xs sm:btn-sm md:btn-md
               w-full p-3 rounded-none hover:border-white bg-[#947458] text-white border-transparent mt-2">
             Оставить заявку
           </button>
