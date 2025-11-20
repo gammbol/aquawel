@@ -15,13 +15,13 @@ const Hero = () => {
           </p>
           <div className="flex gap-5 items-center justify-center max-w-lg w-full flex-col md:flex-row">
             <button className="btn btn-outline btn-md md:btn-md lg:btn-lg
-              xl:btn-xl md:max-w-1/2 w-full p-3 rounded-none hover:border-white bg-[#947458] text-white border-transparent">
+              xl:btn-xl md:max-w-1/2 w-full p-3 hover:border-white bg-[#947458] text-white border-transparent">
               кнопикс в разработке :3
             </button>
             <button
               onClick={openModal}
               className="btn btn-outline btn-md md:btn-md lg:btn-lg
-              xl:btn-xl md:max-w-1/2 w-full p-3 md:p-0 rounded-none text-white hover:bg-[#947458]">
+              xl:btn-xl md:max-w-1/2 w-full p-3 md:p-0 text-white hover:bg-[#947458]">
               Оставить заявку
             </button>
           </div>

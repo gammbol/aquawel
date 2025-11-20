@@ -25,7 +25,7 @@ const Footer = () => {
             onChange={(phone) => setPhone(phone)}
           />
           <button onClick={handleOpenModal} className="btn btn-outline btn-xs sm:btn-sm md:btn-md
-              w-full p-3 rounded-none hover:border-white bg-[#947458] text-white border-transparent mt-2">
+              w-full p-3 hover:border-white bg-[#947458] text-white border-transparent mt-2">
             Оставить заявку
           </button>
         </div>

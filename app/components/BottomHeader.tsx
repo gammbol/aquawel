@@ -16,7 +16,7 @@ const BottomHeader = () => {
 
   return (
     <>
-      <div className="flex justify-between md:justify-center items-center gap-40">
+      <div className="flex justify-center md:justify-center items-center gap-40 py-2">
         {/* Бургер меню для мобильных - абсолютное позиционирование слева */}
         <div className="md:hidden block left-4">
           <button
@@ -32,13 +32,13 @@ const BottomHeader = () => {
 
         {/* Логотип - остается по центру как было */}
         <div>
-          <Image src="/logo.jpg" alt="Логотип компании Aquawel" width={100} height={100} />
+          <Image src="/logo.svg" alt="Логотип компании Aquawel" width={110} height={110} />
         </div>
 
         {/* Навигация для десктопа - без изменений */}
         <ul className="md:flex justify-center items-center gap-10 hidden">
-          <li><Link href="/">Главная</Link></li>
-          <li><Link href="#about">О нас</Link></li>
+          <li className="text-lg"><Link href="/">Главная</Link></li>
+          <li className="text-lg"><Link href="#about">О нас</Link></li>
           {/*<li><Link href="/store">Магазин</Link></li>*/}
         </ul>
 
@@ -58,7 +58,7 @@ const BottomHeader = () => {
       `}>
         {/* Заголовок меню */}
         <div className="flex justify-between items-center p-4 border-b">
-          <Image src="/logo.jpg" alt="Логотип компании Aquawel" width={80} height={80} />
+          <Image src="/logo.svg" alt="Логотип компании Aquawel" width={80} height={80} />
           <button
             onClick={closeMenu}
             className="p-2 text-gray-700 hover:text-blue-600 transition-colors"
