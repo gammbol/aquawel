@@ -15,7 +15,7 @@ const Footer = () => {
   return (
     <footer className="bg-[#F6F4F2] p-5">
       <div className="flex items-center justify-center px-2 md:px-16 py-12 md:py-24 gap-5 pb-12 md:flex-row flex-col">
-        <h2 className="text-xl font-bold text-center self-center md:self-start">
+        <h2 className="text-md md:text-xl font-bold text-center self-center md:self-start">
           Оставьте заявку и мы подберем фурнитур именно для вас!
         </h2>
         <div>
@@ -31,7 +31,7 @@ const Footer = () => {
         </div>
       </div>
       <div>
-        <p className="text-center text-sm text-gray-400">Aquawel © 2025</p>
+        <p className="text-center text-xs md:text-sm text-gray-400">Aquawel © 2025</p>
       </div>
     </footer>
   );

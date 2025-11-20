@@ -16,7 +16,7 @@ const BottomHeader = () => {
 
   return (
     <>
-      <div className="flex justify-center md:justify-center items-center gap-40 py-2">
+      <div className="flex justify-between md:justify-center items-center gap-40 py-2 px-4">
         {/* Бургер меню для мобильных - абсолютное позиционирование слева */}
         <div className="md:hidden block left-4">
           <button
@@ -32,7 +32,13 @@ const BottomHeader = () => {
 
         {/* Логотип - остается по центру как было */}
         <div>
-          <Image src="/logo.svg" alt="Логотип компании Aquawel" width={110} height={110} />
+          <Image
+            src="/logo.svg"
+            alt="Логотип компании Aquawel"
+            width={110}
+            height={110}
+            className="w-20 h-20 md:w-28 md:h-28" // 80px на мобильных, 112px на десктопе
+          />
         </div>
 
         {/* Навигация для десктопа - без изменений */}
