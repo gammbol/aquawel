@@ -5,6 +5,10 @@ import React from 'react';
 const Hero = () => {
   const { openModal } = useModal();
 
+  const handleOpenModal = () => {
+    openModal(); // Передаем текущий номер телефона
+  };
+
   return (
     <section className="bg-[url(/hero-bg.jpg)]">
       <div className="bg-black/65 backdrop-blur-2xl w-full h-full">
@@ -19,7 +23,7 @@ const Hero = () => {
               кнопикс в разработке :3
             </button>
             <button
-              onClick={openModal}
+              onClick={handleOpenModal}
               className="btn btn-outline btn-md md:btn-md lg:btn-lg
               xl:btn-xl md:max-w-1/2 w-full p-3 md:p-0 text-white hover:bg-[#947458]">
               Оставить заявку
