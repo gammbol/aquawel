@@ -45,7 +45,7 @@ const ApplicationModal = () => {
     }
 
     try {
-      const response = await fetch('/orders', {
+      const response = await fetch("http://localhost:5289/api/order", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
