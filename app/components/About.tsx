@@ -8,16 +8,16 @@ const About = () => {
         {/* Текстовая часть */}
         <div className="md:w-1/2 flex justify-end pr-0 md:pr-8 mb-8 md:mb-0">
           <div className="max-w-md text-center md:text-right">
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">О нашей компании</h2>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 text-left">О нашей компании</h2>
             <p className="text-md md:text-lg text-gray-600">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-              sed do eiusmod tempor incididunt ut labore et dolore magna
-              aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-              ullamco laboris nisi ut aliquip ex ea commodo consequat.
-              Duis aute irure dolor in reprehenderit in voluptate velit esse
-              cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-              cupidatat non proident, sunt in culpa qui officia deserunt mollit
-              anim id est laborum.
+              Элегантная мебель для ванной от Aquawel
+              Aquawel в Москве предлагает изготовление стильной и функциональной мебели для ванной комнаты, создавая уют и комфорт в вашем доме. Закажите у нас авторскую мебель и наслаждайтесь качеством и красотой!
+            </p>
+            <h3 className="text-xl md:text-3xl font-bold mb-2 mt-4 text-left">Почему мы?</h3>
+            <p className="text-md md:text-lg text-gray-600">
+              Выбирайте Aquawel: качество, стиль и долговечность. Индивидуальный подход, уникальные решения и безупречный сервис. Ваша ванная комната станет уютной и функциональной с нашей мебелью.
+
+              Aquawel предлагает эксклюзивный дизайн и надежность. Профессиональное изготовление мебели с учетом всех пожеланий клиента. Преобразите свою ванную комнату с нами!
             </p>
           </div>
         </div>

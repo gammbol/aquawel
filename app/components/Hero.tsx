@@ -20,7 +20,7 @@ const Hero = () => {
           <div className="flex gap-5 items-center justify-center max-w-lg w-full flex-col md:flex-row">
             <button className="btn btn-outline btn-md md:btn-md lg:btn-lg
               xl:btn-xl md:max-w-1/2 w-full p-3 hover:border-white bg-[#947458] text-white border-transparent">
-              кнопикс в разработке :3
+              В разработке...
             </button>
             <button
               onClick={handleOpenModal}
