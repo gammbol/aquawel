@@ -27,6 +27,8 @@ export default function RootLayout({
   return (
     <html lang="en">
     <head>
+      <title>Aquawel: мебель для ванных комнат</title>
+      <link rel="icon" type="image/x-icon" href="/logo_light.svg"/>
       {/* eslint-disable-next-line @next/next/no-sync-scripts */}
       <link
         rel="stylesheet"
