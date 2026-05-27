@@ -1,5 +1,4 @@
 import React from 'react';
-import SearchBar from "@/app/components/searchbar";
 import Link from "next/link";
 
 const TopHeader = () => {

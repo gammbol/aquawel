@@ -1,6 +1,7 @@
 'use client';
 import {useModal} from "@/app/contexts/ModalContext";
 import React from 'react';
+import Link from "next/link";
 
 const Hero = () => {
   const { openModal } = useModal();
@@ -18,10 +19,13 @@ const Hero = () => {
             Качествeнный выбop, кoтоpому можно доверять
           </p>
           <div className="flex gap-5 items-center justify-center max-w-lg w-full flex-col md:flex-row">
-            <button className="btn btn-outline btn-md md:btn-md lg:btn-lg
-              xl:btn-xl md:max-w-1/2 w-full p-3 hover:border-white bg-[#947458] text-white border-transparent">
-              В разработке...
-            </button>
+            <Link
+              href="/catalog"
+              className="btn btn-outline btn-md md:btn-md lg:btn-lg
+              xl:btn-xl md:max-w-1/2 w-full p-3 hover:border-white bg-[#947458] text-white border-transparent"
+            >
+              Каталог мебели
+            </Link>
             <button
               onClick={handleOpenModal}
               className="btn btn-outline btn-md md:btn-md lg:btn-lg

@@ -25,9 +25,11 @@ const About = () => {
         {/* Фотография */}
         <div className="md:w-1/2 flex justify-start pl-0 md:pl-8">
           <div className="max-w-md w-full">
-            <img
-              src="/about.jpg" // Замените на ваш путь к изображению
+            <Image
+              src="/about.jpg"
               alt="О нашей компании"
+              width={600}
+              height={800}
               className="w-full h-auto rounded-lg shadow-2xl"
             />
           </div>

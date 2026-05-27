@@ -44,8 +44,8 @@ const BottomHeader = () => {
         {/* Навигация для десктопа - без изменений */}
         <ul className="md:flex justify-center items-center gap-10 hidden">
           <li className="text-lg"><Link href="/">Главная</Link></li>
-          <li className="text-lg"><Link href="#about">О нас</Link></li>
-          {/*<li><Link href="/store">Магазин</Link></li>*/}
+          <li className="text-lg"><Link href="/#about">О нас</Link></li>
+          <li className="text-lg"><Link href="/catalog">Каталог</Link></li>
         </ul>
 
         {/* Иконки пользователя - без изменений */}
@@ -90,11 +90,20 @@ const BottomHeader = () => {
             </li>
             <li>
               <Link
-                href="#about"
+                href="/#about"
                 onClick={closeMenu}
                 className="block py-3 text-lg font-medium text-gray-700 hover:text-blue-600 transition-colors border-b"
               >
                 О нас
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/catalog"
+                onClick={closeMenu}
+                className="block py-3 text-lg font-medium text-gray-700 hover:text-blue-600 transition-colors border-b"
+              >
+                Каталог
               </Link>
             </li>
           </ul>

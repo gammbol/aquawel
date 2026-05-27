@@ -1,4 +1,5 @@
 import React, {ReactNode} from 'react';
+import Image from "next/image";
 
 interface CardProps {
   name: string;
@@ -19,9 +20,11 @@ const FeedbackCard = ({ name, stars = 5, message = "", photoPath="/logo.jpg" } :
   return (
     <div className="card bg-base-100 shadow-sm h-full flex flex-col">
       <figure className="flex-shrink-0">
-        <img
+        <Image
           src={photoPath}
-          alt="Movie"
+          alt={`Отзыв покупателя ${name}`}
+          width={420}
+          height={260}
           className="w-full h-48 object-cover" />
       </figure>
       <div className="card-body flex flex-col flex-grow">

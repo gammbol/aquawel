@@ -5,6 +5,7 @@ import { useModal } from '@/app/contexts/ModalContext';
 import React, { useState, useEffect } from 'react';
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
+import { ORDER_API_URL } from '@/app/lib/catalogApi';
 
 const ApplicationModal = () => {
   const { isModalOpen, closeModal, initialPhone } = useModal();
@@ -45,7 +46,7 @@ const ApplicationModal = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5289/api/order", {
+      const response = await fetch(ORDER_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -130,11 +131,18 @@ const ApplicationModal = () => {
             />
           </div>
 
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
+
           <button
             type="submit"
-            className="w-full bg-[#947458] text-white py-3 px-4 rounded-lg shadow-xl hover:shadow-sm transition-all font-medium"
+            disabled={loading}
+            className="w-full bg-[#947458] text-white py-3 px-4 rounded-lg shadow-xl hover:shadow-sm transition-all font-medium disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Отправить заявку
+            {loading ? 'Отправка...' : 'Отправить заявку'}
           </button>
         </form>
       </div>

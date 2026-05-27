@@ -25,10 +25,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ru">
     <head>
       <link rel="icon" type="image/x-icon" href="/logo_light.svg"/>
-      {/* eslint-disable-next-line @next/next/no-sync-scripts */}
       <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
