@@ -3,7 +3,11 @@ import React, { useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 
-const BottomHeader = () => {
+interface BottomHeaderProps {
+  showActions?: boolean;
+}
+
+const BottomHeader = ({ showActions = true }: BottomHeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -49,11 +53,13 @@ const BottomHeader = () => {
         </ul>
 
         {/* Иконки пользователя - без изменений */}
-        <div className="md:flex justify-center items-center gap-5 hidden">
-          <Link href="/account"><i className="fa-solid fa-user"></i></Link>
-          <Link href="/cart"><i className="fa-solid fa-cart-shopping"></i></Link>
-          <Link href="/shoppingbag"><i className="fa-solid fa-bag-shopping"></i></Link>
-        </div>
+        {showActions && (
+          <div className="md:flex justify-center items-center gap-5 hidden">
+            <Link href="/account"><i className="fa-solid fa-user"></i></Link>
+            <Link href="/cart"><i className="fa-solid fa-cart-shopping"></i></Link>
+            <Link href="/shoppingbag"><i className="fa-solid fa-bag-shopping"></i></Link>
+          </div>
+        )}
       </div>
 
       {/* Мобильное меню */}
@@ -111,17 +117,19 @@ const BottomHeader = () => {
 
         {/* Дополнительные ссылки */}
         <div className="absolute bottom-0 left-0 right-0 p-6 border-t">
-          <div className="flex justify-center space-x-6 mb-4">
-            <Link href="/account" onClick={closeMenu} className="p-2 text-gray-600 hover:text-blue-600">
-              <i className="fa-solid fa-user text-xl"></i>
-            </Link>
-            <Link href="/cart" onClick={closeMenu} className="p-2 text-gray-600 hover:text-blue-600">
-              <i className="fa-solid fa-cart-shopping text-xl"></i>
-            </Link>
-            <Link href="/shoppingbag" onClick={closeMenu} className="p-2 text-gray-600 hover:text-blue-600">
-              <i className="fa-solid fa-bag-shopping text-xl"></i>
-            </Link>
-          </div>
+          {showActions && (
+            <div className="flex justify-center space-x-6 mb-4">
+              <Link href="/account" onClick={closeMenu} className="p-2 text-gray-600 hover:text-blue-600">
+                <i className="fa-solid fa-user text-xl"></i>
+              </Link>
+              <Link href="/cart" onClick={closeMenu} className="p-2 text-gray-600 hover:text-blue-600">
+                <i className="fa-solid fa-cart-shopping text-xl"></i>
+              </Link>
+              <Link href="/shoppingbag" onClick={closeMenu} className="p-2 text-gray-600 hover:text-blue-600">
+                <i className="fa-solid fa-bag-shopping text-xl"></i>
+              </Link>
+            </div>
+          )}
           <p className="text-center text-sm text-gray-700">г.Домодедово, Станционная ул. 3</p>
           <p className="text-center text-sm text-gray-700 mb-1">
             <i className="fa-solid fa-phone mr-2"></i>

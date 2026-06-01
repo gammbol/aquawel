@@ -5,14 +5,14 @@ import TopHeader from "@/app/components/TopHeader";
 
 export const metadata = {
   title: "Каталог мебели | Aquawel",
-  description: "Интернет-каталог мебели для ванной комнаты Aquawel",
+  description: "Коллекции мебели Aquawel для розничных клиентов, дизайнеров и застройщиков",
 };
 
 export default function Catalog() {
   return (
     <>
       <TopHeader />
-      <BottomHeader />
+      <BottomHeader showActions={false} />
       <CatalogPage />
       <Footer />
     </>

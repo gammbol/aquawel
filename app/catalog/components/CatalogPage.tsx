@@ -1,92 +1,90 @@
 "use client";
 
+import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
 import ProductCard from "@/app/catalog/components/ProductCard";
-import type { CatalogProduct } from "@/app/data/products";
-import { CATALOG_API_URL } from "@/app/lib/catalogApi";
+import type { CollectionProduct, FurnitureCollection } from "@/app/data/collections";
+import { COLLECTIONS_API_URL, LEAD_API_URL } from "@/app/lib/catalogApi";
 
-type CatalogResponse = {
-  products: CatalogProduct[];
-  meta: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    categories: string[];
-  };
+type CollectionsResponse = {
+  collections: FurnitureCollection[];
 };
 
-const PAGE_SIZE = 8;
+type LeadForm = {
+  name: string;
+  email: string;
+  phone: string;
+  wishes: string;
+};
 
-const defaultMeta: CatalogResponse["meta"] = {
-  page: 1,
-  limit: PAGE_SIZE,
-  total: 0,
-  totalPages: 1,
-  categories: [],
+type Toast = {
+  type: "success" | "error";
+  message: string;
+};
+
+const initialForm: LeadForm = {
+  name: "",
+  email: "",
+  phone: "",
+  wishes: "",
+};
+
+const getGridClassName = (productCount: number) => {
+  if (productCount === 1) {
+    return "grid grid-cols-1 gap-6 max-w-md mx-auto";
+  }
+
+  if (productCount === 2) {
+    return "grid grid-cols-1 gap-6 md:grid-cols-2 max-w-4xl mx-auto";
+  }
+
+  return "grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3";
+};
+
+const getProductWord = (count: number) => {
+  const remainder10 = count % 10;
+  const remainder100 = count % 100;
+
+  if (remainder10 === 1 && remainder100 !== 11) return "изделие";
+  if ([2, 3, 4].includes(remainder10) && ![12, 13, 14].includes(remainder100)) return "изделия";
+
+  return "изделий";
 };
 
 const CatalogPage = () => {
-  const [products, setProducts] = useState<CatalogProduct[]>([]);
-  const [meta, setMeta] = useState(defaultMeta);
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [sort, setSort] = useState("popular");
-  const [page, setPage] = useState(1);
+  const [collections, setCollections] = useState<FurnitureCollection[]>([]);
+  const [activeCollectionId, setActiveCollectionId] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<CollectionProduct | null>(null);
+  const [selectedCollection, setSelectedCollection] = useState<FurnitureCollection | null>(null);
+  const [form, setForm] = useState<LeadForm>(initialForm);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setSearch(searchInput.trim());
-      setPage(1);
-    }, 350);
-
-    return () => window.clearTimeout(timeout);
-  }, [searchInput]);
-
-  const requestUrl = useMemo(() => {
-    const params = new URLSearchParams({
-      page: String(page),
-      limit: String(PAGE_SIZE),
-      sort,
-    });
-
-    if (search) params.set("search", search);
-    if (category) params.set("category", category);
-    if (minPrice) params.set("minPrice", minPrice);
-    if (maxPrice) params.set("maxPrice", maxPrice);
-
-    return `${CATALOG_API_URL}?${params.toString()}`;
-  }, [category, maxPrice, minPrice, page, search, sort]);
+  const [formError, setFormError] = useState("");
+  const [toast, setToast] = useState<Toast | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    const loadProducts = async () => {
+    const loadCollections = async () => {
       setIsLoading(true);
       setError("");
 
       try {
-        const response = await fetch(requestUrl, { signal: controller.signal });
+        const response = await fetch(COLLECTIONS_API_URL, { signal: controller.signal });
 
         if (!response.ok) {
-          throw new Error(`Ошибка загрузки каталога: ${response.status}`);
+          throw new Error(`Ошибка загрузки коллекций: ${response.status}`);
         }
 
-        const data = (await response.json()) as CatalogResponse;
-        setProducts(data.products);
-        setMeta(data.meta);
+        const data = (await response.json()) as CollectionsResponse;
+        setCollections(data.collections);
+        setActiveCollectionId(data.collections[0]?.id ?? "");
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;
 
         console.error(err);
-        setError("Не удалось загрузить каталог. Проверьте API или попробуйте обновить страницу.");
-        setProducts([]);
-        setMeta(defaultMeta);
+        setError("Не удалось загрузить коллекции. Проверьте API или попробуйте обновить страницу.");
       } finally {
         if (!controller.signal.aborted) {
           setIsLoading(false);
@@ -94,257 +92,349 @@ const CatalogPage = () => {
       }
     };
 
-    loadProducts();
+    loadCollections();
 
     return () => controller.abort();
-  }, [requestUrl]);
+  }, []);
 
+  useEffect(() => {
+    if (!toast) return;
 
-  const visiblePages = useMemo(() => {
-    const pages: number[] = [];
-    const totalPages = meta.totalPages;
-    const firstPage = Math.max(1, meta.page - 2);
-    const lastPage = Math.min(totalPages, meta.page + 2);
+    const timeout = window.setTimeout(() => {
+      setToast(null);
+    }, 4200);
 
-    for (let pageNumber = firstPage; pageNumber <= lastPage; pageNumber += 1) {
-      pages.push(pageNumber);
-    }
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
 
-    return pages;
-  }, [meta.page, meta.totalPages]);
+  const activeCollection = useMemo(
+    () => collections.find((collection) => collection.id === activeCollectionId) ?? collections[0] ?? null,
+    [activeCollectionId, collections],
+  );
 
-  const resetFilters = () => {
-    setSearchInput("");
-    setSearch("");
-    setCategory("");
-    setMinPrice("");
-    setMaxPrice("");
-    setSort("popular");
-    setPage(1);
+  const openLeadModal = (product: CollectionProduct, collection: FurnitureCollection) => {
+    setSelectedProduct(product);
+    setSelectedCollection(collection);
+    setForm(initialForm);
+    setFormError("");
   };
 
-  const handleFilterChange = (setter: React.Dispatch<React.SetStateAction<string>>) =>
-    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      setter(event.target.value);
-      setPage(1);
+  const closeLeadModal = () => {
+    if (isSending) return;
+
+    setSelectedProduct(null);
+    setSelectedCollection(null);
+    setForm(initialForm);
+    setFormError("");
+  };
+
+  const handleFormChange = (field: keyof LeadForm) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setForm((currentForm) => ({
+        ...currentForm,
+        [field]: event.target.value,
+      }));
     };
 
-  const renderSkeletons = () =>
-    Array.from({ length: PAGE_SIZE }, (_, index) => (
-      <div key={index} className="card bg-white border border-[#e6ded6] shadow-sm overflow-hidden">
-        <div className="skeleton h-64 rounded-none bg-[#ece5df]" />
-        <div className="p-5 space-y-3">
-          <div className="skeleton h-6 w-3/4 bg-[#ece5df]" />
-          <div className="skeleton h-4 w-full bg-[#ece5df]" />
-          <div className="skeleton h-4 w-2/3 bg-[#ece5df]" />
-          <div className="flex justify-between pt-4">
-            <div className="skeleton h-7 w-24 bg-[#ece5df]" />
-            <div className="skeleton h-9 w-24 bg-[#ece5df]" />
-          </div>
-        </div>
-      </div>
-    ));
+  const handleSubmitLead = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setFormError("");
+
+    if (!selectedProduct || !selectedCollection) return;
+
+    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
+      setFormError("Заполните имя, email и телефон.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email.trim())) {
+      setFormError("Введите корректный email.");
+      return;
+    }
+
+    setIsSending(true);
+
+    try {
+      const response = await fetch(LEAD_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          wishes: form.wishes.trim(),
+          productId: selectedProduct.id,
+          productTitle: selectedProduct.title,
+          collectionId: selectedCollection.id,
+          collectionName: selectedCollection.name,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ошибка отправки заявки: ${response.status}`);
+      }
+
+      setSelectedProduct(null);
+      setSelectedCollection(null);
+      setForm(initialForm);
+      setToast({
+        type: "success",
+        message: "Заявка отправлена. Менеджер Aquawel свяжется с вами для уточнения деталей.",
+      });
+    } catch (err) {
+      console.error(err);
+      setSelectedProduct(null);
+      setSelectedCollection(null);
+      setToast({
+        type: "error",
+        message: "Не удалось отправить заявку. Попробуйте ещё раз или свяжитесь с компанией напрямую.",
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const isLeadModalOpen = Boolean(selectedProduct && selectedCollection);
 
   return (
-    <main className="bg-[#F6F4F2] min-h-screen">
+    <main className="min-h-screen bg-[#F6F4F2]">
       <section className="bg-[url(/hero-bg.jpg)] bg-cover bg-center">
         <div className="bg-black/65 backdrop-blur-xl">
-          <div className="max-w-7xl mx-auto px-5 py-20 md:py-28 text-center text-white">
-            <p className="uppercase tracking-[0.35em] text-xs md:text-sm text-gray-200 mb-4">Aquawel catalog</p>
-            <h1 className="text-4xl md:text-7xl font-medium mb-5">Каталог мебели</h1>
-            <p className="max-w-2xl mx-auto text-sm md:text-lg text-gray-100">
-              Подберите мебель для ванной комнаты по категории, бюджету и стилю. Сейчас каталог работает на placeholder API,
-              который легко заменить на реальный backend.
+          <div className="mx-auto max-w-7xl px-5 py-20 text-center text-white md:py-28">
+            <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gray-200 md:text-sm">Aquawel collections</p>
+            <h1 className="mb-5 text-4xl font-medium md:text-7xl">Коллекции мебели</h1>
+            <p className="mx-auto max-w-2xl text-sm leading-7 text-gray-100 md:text-lg">
+              Витрина готовых стилистических решений для розничных клиентов, дизайнеров и комплексных поставок
+              застройщикам.
             </p>
           </div>
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-5 py-10 md:py-14">
-        <div className="bg-white rounded-2xl shadow-xl border border-[#e6ded6] p-4 md:p-6 -mt-20 relative z-10 mb-8">
-          <label className="block text-sm text-gray-500 mb-2" htmlFor="catalog-search">
-            Поиск по каталогу
-          </label>
-          <div className="flex flex-col md:flex-row gap-3">
-            <input
-              id="catalog-search"
-              type="search"
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="Например: тумба, зеркало, пенал..."
-              className="input input-bordered w-full bg-[#F6F4F2] border-[#d8cec4] focus:outline-none focus:border-[#947458]"
-            />
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="btn btn-outline border-[#947458] text-[#947458] hover:border-[#947458] hover:bg-[#947458] hover:text-white md:w-44"
-            >
-              Сбросить
-            </button>
+      <section className="mx-auto max-w-7xl px-5 py-10 md:py-14">
+        <div className="relative z-10 -mt-20 mb-8 rounded-3xl border border-[#e6ded6] bg-white p-4 shadow-xl md:p-6">
+          <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-sm uppercase tracking-[0.24em] text-[#947458]">Выберите коллекцию</p>
+              <h2 className="text-3xl font-semibold md:text-4xl">Каталог-витрина Aquawel</h2>
+            </div>
+            <p className="max-w-lg text-sm leading-6 text-gray-500">
+              Коллекция объединяет несколько изделий в одной стилистике. Переключение ниже меняет весь набор товаров
+              без перезагрузки страницы.
+            </p>
           </div>
+
+          {isLoading ? (
+            <div className="flex flex-wrap gap-3">
+              {Array.from({ length: 5 }, (_, index) => (
+                <div key={index} className="skeleton h-11 w-36 rounded-full bg-[#ece5df]" />
+              ))}
+            </div>
+          ) : (
+            <div className="flex gap-3 overflow-x-auto pb-2 md:flex-wrap md:overflow-visible">
+              {collections.map((collection) => {
+                const isActive = collection.id === activeCollection?.id;
+
+                return (
+                  <button
+                    key={collection.id}
+                    type="button"
+                    onClick={() => setActiveCollectionId(collection.id)}
+                    className={`shrink-0 rounded-full border px-5 py-3 text-sm font-medium transition-all duration-300 ${
+                      isActive
+                        ? "border-[#947458] bg-[#947458] text-white shadow-lg"
+                        : "border-[#e0d6cc] bg-[#F6F4F2] text-[#171717] hover:border-[#947458] hover:text-[#947458]"
+                    }`}
+                  >
+                    {collection.name}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 items-start">
-          <aside className="bg-white border border-[#e6ded6] rounded-2xl shadow-sm p-5 lg:sticky lg:top-6">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-2xl font-semibold">Фильтры</h2>
-              <span className="text-sm text-gray-500">{meta.total} шт.</span>
-            </div>
+        {error && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700">
+            {error}
+          </div>
+        )}
 
-            <div className="space-y-5">
+        {!isLoading && activeCollection && (
+          <div key={activeCollection.id} className="animate-[collectionFade_420ms_ease]">
+            <div className="mb-8 grid gap-5 rounded-3xl border border-[#e6ded6] bg-white p-6 shadow-sm lg:grid-cols-[0.75fr_1.25fr] lg:p-8">
               <div>
-                <label className="block text-sm text-gray-500 mb-2" htmlFor="catalog-category">
-                  Категория
-                </label>
-                <select
-                  id="catalog-category"
-                  value={category}
-                  onChange={handleFilterChange(setCategory)}
-                  className="select select-bordered w-full bg-[#F6F4F2] border-[#d8cec4] focus:outline-none focus:border-[#947458]"
-                >
-                  <option value="">Все категории</option>
-                  {meta.categories.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
+                <p className="mb-2 text-sm uppercase tracking-[0.24em] text-[#947458]">{activeCollection.name}</p>
+                <h2 className="text-3xl font-semibold md:text-5xl">{activeCollection.subtitle}</h2>
               </div>
-
-              <div>
-                <label className="block text-sm text-gray-500 mb-2">Цена</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    type="number"
-                    min="0"
-                    value={minPrice}
-                    onChange={handleFilterChange(setMinPrice)}
-                    placeholder="от"
-                    className="input input-bordered w-full bg-[#F6F4F2] border-[#d8cec4] focus:outline-none focus:border-[#947458]"
-                  />
-                  <input
-                    type="number"
-                    min="0"
-                    value={maxPrice}
-                    onChange={handleFilterChange(setMaxPrice)}
-                    placeholder="до"
-                    className="input input-bordered w-full bg-[#F6F4F2] border-[#d8cec4] focus:outline-none focus:border-[#947458]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm text-gray-500 mb-2" htmlFor="catalog-sort">
-                  Сортировка
-                </label>
-                <select
-                  id="catalog-sort"
-                  value={sort}
-                  onChange={handleFilterChange(setSort)}
-                  className="select select-bordered w-full bg-[#F6F4F2] border-[#d8cec4] focus:outline-none focus:border-[#947458]"
-                >
-                  <option value="popular">Сначала популярные</option>
-                  <option value="price-asc">Сначала дешевле</option>
-                  <option value="price-desc">Сначала дороже</option>
-                  <option value="title">По названию</option>
-                </select>
-              </div>
-            </div>
-          </aside>
-
-          <div>
-            {error && (
-              <div className="alert bg-red-50 text-red-700 border border-red-200 mb-6">
-                <span>{error}</span>
-              </div>
-            )}
-
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-semibold">Товары</h2>
-                <p className="text-sm text-gray-500">
-                  Страница {meta.page} из {meta.totalPages} · показано до {PAGE_SIZE} товаров за запрос
+              <div className="text-sm leading-7 text-gray-600 md:text-base">
+                <p>{activeCollection.description}</p>
+                <p className="mt-4 text-[#947458]">
+                  В коллекции: {activeCollection.products.length} {getProductWord(activeCollection.products.length)}
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-              {isLoading ? renderSkeletons() : products.map((product) => <ProductCard key={product.id} product={product} />)}
+            <div className={getGridClassName(activeCollection.products.length)}>
+              {activeCollection.products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  collection={activeCollection}
+                  onBuy={openLeadModal}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {isLeadModalOpen && selectedProduct && selectedCollection && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md animate-[modalBackdrop_220ms_ease]">
+          <div className="grid max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl animate-[modalEnter_260ms_ease] lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="relative hidden min-h-[620px] overflow-hidden bg-[#171717] lg:block">
+              <ImagePreview product={selectedProduct} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                <p className="mb-3 text-xs uppercase tracking-[0.28em] text-gray-200">{selectedCollection.name}</p>
+                <h2 className="text-4xl font-semibold">{selectedProduct.title}</h2>
+                <p className="mt-3 max-w-md text-sm leading-6 text-gray-100">{selectedProduct.description}</p>
+              </div>
             </div>
 
-            {!isLoading && !error && products.length === 0 && (
-              <div className="bg-white rounded-2xl border border-[#e6ded6] p-10 text-center mt-6">
-                <h3 className="text-2xl font-semibold mb-2">Ничего не найдено</h3>
-                <p className="text-gray-500 mb-5">Попробуйте изменить поисковый запрос или сбросить фильтры.</p>
-                <button type="button" onClick={resetFilters} className="btn bg-[#947458] text-white hover:bg-[#7f624a] border-0">
-                  Сбросить фильтры
-                </button>
-              </div>
-            )}
-
-            {!isLoading && !error && meta.total > 0 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 bg-white rounded-2xl border border-[#e6ded6] p-4">
+            <div className="overflow-y-auto p-5 md:p-8">
+              <div className="mb-6 flex items-start justify-between gap-4">
+                <div>
+                  <p className="mb-2 text-xs uppercase tracking-[0.24em] text-[#947458]">Заявка на изделие</p>
+                  <h2 className="text-3xl font-semibold">Оставить заявку</h2>
+                  <p className="mt-2 text-sm leading-6 text-gray-500">
+                    Укажите контакты, и менеджер уточнит комплектацию, размеры, сроки и условия заказа.
+                  </p>
+                </div>
                 <button
                   type="button"
-                  disabled={meta.page <= 1}
-                  onClick={() => setPage((currentPage) => Math.max(currentPage - 1, 1))}
-                  className="btn btn-outline border-[#947458] text-[#947458] hover:border-[#947458] hover:bg-[#947458] hover:text-white disabled:opacity-40"
+                  onClick={closeLeadModal}
+                  className="btn btn-circle btn-ghost text-2xl text-gray-500 hover:text-[#171717]"
+                  aria-label="Закрыть окно заявки"
                 >
-                  Назад
+                  ×
                 </button>
+              </div>
 
-                <div className="join">
-                  {meta.page > 3 && (
-                    <button
-                      type="button"
-                      onClick={() => setPage(1)}
-                      className="join-item btn bg-white border-[#e6ded6] text-[#171717]"
-                    >
-                      1
-                    </button>
-                  )}
-                  {meta.page > 4 && <button type="button" className="join-item btn bg-white border-[#e6ded6]" disabled>...</button>}
-                  {visiblePages.map((pageNumber) => (
-                    <button
-                      key={pageNumber}
-                      type="button"
-                      onClick={() => setPage(pageNumber)}
-                      className={`join-item btn ${
-                        pageNumber === meta.page
-                          ? "bg-[#947458] text-white border-[#947458]"
-                          : "bg-white border-[#e6ded6] text-[#171717]"
-                      }`}
-                    >
-                      {pageNumber}
-                    </button>
-                  ))}
-                  {meta.page < meta.totalPages - 3 && <button type="button" className="join-item btn bg-white border-[#e6ded6]" disabled>...</button>}
-                  {meta.page < meta.totalPages - 2 && (
-                    <button
-                      type="button"
-                      onClick={() => setPage(meta.totalPages)}
-                      className="join-item btn bg-white border-[#e6ded6] text-[#171717]"
-                    >
-                      {meta.totalPages}
-                    </button>
-                  )}
+              <div className="mb-6 rounded-2xl bg-[#F6F4F2] p-4">
+                <p className="text-sm text-gray-500">Выбранное изделие</p>
+                <p className="font-medium text-[#171717]">{selectedProduct.title}</p>
+                <p className="mt-1 text-sm text-[#947458]">{selectedCollection.name}</p>
+              </div>
+
+              <form onSubmit={handleSubmitLead} className="space-y-4">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="lead-name">
+                    Имя *
+                  </label>
+                  <input
+                    id="lead-name"
+                    type="text"
+                    value={form.name}
+                    onChange={handleFormChange("name")}
+                    className="input input-bordered w-full border-[#d8cec4] bg-[#F6F4F2] focus:border-[#947458] focus:outline-none"
+                    placeholder="Ваше имя"
+                    autoComplete="name"
+                  />
                 </div>
 
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="lead-email">
+                    Электронная почта *
+                  </label>
+                  <input
+                    id="lead-email"
+                    type="email"
+                    value={form.email}
+                    onChange={handleFormChange("email")}
+                    className="input input-bordered w-full border-[#d8cec4] bg-[#F6F4F2] focus:border-[#947458] focus:outline-none"
+                    placeholder="example@domain.com"
+                    autoComplete="email"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="lead-phone">
+                    Телефон *
+                  </label>
+                  <input
+                    id="lead-phone"
+                    type="tel"
+                    value={form.phone}
+                    onChange={handleFormChange("phone")}
+                    className="input input-bordered w-full border-[#d8cec4] bg-[#F6F4F2] focus:border-[#947458] focus:outline-none"
+                    placeholder="+7 999 000-00-00"
+                    autoComplete="tel"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="lead-wishes">
+                    Пожелания
+                  </label>
+                  <textarea
+                    id="lead-wishes"
+                    value={form.wishes}
+                    onChange={handleFormChange("wishes")}
+                    className="textarea textarea-bordered min-h-28 w-full border-[#d8cec4] bg-[#F6F4F2] focus:border-[#947458] focus:outline-none"
+                    placeholder="Например: нужен комплект под размер, интересует оптовая поставка, требуется консультация дизайнера..."
+                  />
+                </div>
+
+                {formError && (
+                  <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    {formError}
+                  </p>
+                )}
+
                 <button
-                  type="button"
-                  disabled={meta.page >= meta.totalPages}
-                  onClick={() => setPage((currentPage) => Math.min(currentPage + 1, meta.totalPages))}
-                  className="btn btn-outline border-[#947458] text-[#947458] hover:border-[#947458] hover:bg-[#947458] hover:text-white disabled:opacity-40"
+                  type="submit"
+                  disabled={isSending}
+                  className="btn w-full border-0 bg-[#947458] py-4 text-white shadow-xl transition-all hover:bg-[#7f624a] hover:shadow-sm disabled:opacity-60"
                 >
-                  Вперед
+                  {isSending ? "Отправка..." : "Отправить заявку"}
                 </button>
-              </div>
-            )}
+              </form>
+            </div>
           </div>
         </div>
-      </section>
+      )}
+
+      {toast && (
+        <div className="fixed bottom-5 right-5 z-[60] w-[calc(100%-2.5rem)] max-w-md animate-[toastSlide_320ms_ease] rounded-2xl border bg-white p-4 shadow-2xl sm:bottom-8 sm:right-8 sm:w-full">
+          <div className="flex gap-3">
+            <span
+              className={`mt-1 h-3 w-3 shrink-0 rounded-full ${toast.type === "success" ? "bg-green-500" : "bg-red-500"}`}
+            />
+            <div>
+              <p className="font-medium text-[#171717]">
+                {toast.type === "success" ? "Заявка отправлена" : "Ошибка отправки"}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-gray-500">{toast.message}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
+
+const ImagePreview = ({ product }: { product: CollectionProduct }) => (
+  <Image
+    src={product.images[0] || "/logo.jpg"}
+    alt={product.title}
+    fill
+    sizes="40vw"
+    className="object-cover"
+  />
+);
 
 export default CatalogPage;
